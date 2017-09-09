@@ -38,36 +38,33 @@ namespace geotab_authentication
                 return;
             }
 
-            string sessionId = null;
 
-            sessionId = Example("Connecting with only password",
+            var result = Example("Connecting with password",
                 username: fleetInfo.Username,
                 password: fleetInfo.Password,
                 database: fleetInfo.GeotabDatabase,
+                server: null,
                 sessionId: null);
 
-            sessionId = Example("Reusing sessionId with new API object (no password, no Authenticate())",
+            result = Example($"Reusing sessionId, specifying server {result.path}",
                 username: fleetInfo.Username,
                 password: null,
                 database: fleetInfo.GeotabDatabase,
-                sessionId: sessionId,
+                sessionId: result.sessionId,
+                server: result.path,
                 authenticate: false);
 
-            sessionId = Example("Connecting with both password and sessionId",
-                username: fleetInfo.Username,
-                password: fleetInfo.Password,
-                database: fleetInfo.GeotabDatabase,
-                sessionId: sessionId);
-
-            sessionId = Example("Reusing sessionId with new API object (no password, calling Authenticate())",
+            result = Example("Attempting to reuse sessionId without specifying server",
                 username: fleetInfo.Username,
                 password: null,
                 database: fleetInfo.GeotabDatabase,
-                sessionId: sessionId,
-                authenticate: true);
+                sessionId: result.sessionId,
+                server: null,
+                authenticate: false
+                );
         }
 
-        private static string Example(string description, string username, string password, string database, string sessionId, bool authenticate = true)
+        private static ExampleResult Example(string description, string username, string password, string database, string sessionId, string server, bool authenticate = true)
         {
             Console.WriteLine($"\n\n#\n#\t{description}\n#\n");
             var api = new Geotab.Checkmate.API(
@@ -75,6 +72,7 @@ namespace geotab_authentication
                 password: password,
                 database: database,
                 sessionId: sessionId,
+                server: server,
                 handler: new LoggingHttpHandler()
             );
 
@@ -91,7 +89,7 @@ namespace geotab_authentication
                 Console.WriteLine($"\n\tGeotab Exception: {e.Message}");
             }
 
-            return api.SessionId;
+            return new ExampleResult{sessionId = api.SessionId, path = api.LoginResult.Path};
         }
 
         public struct GeotabFleetInformation
@@ -100,6 +98,13 @@ namespace geotab_authentication
             public string Password;
             public string GeotabDatabase;
         }
+    }
+
+    internal class ExampleResult
+    {
+        public string sessionId;
+
+        public string path;
     }
 
     internal class LoggingHttpHandler : System.Net.Http.MessageProcessingHandler
