@@ -39,14 +39,14 @@ namespace geotab_authentication
             }
 
 
-            var result = Example("Connecting with password",
+            var result = Example("1) Connecting with password",
                 username: fleetInfo.Username,
                 password: fleetInfo.Password,
                 database: fleetInfo.GeotabDatabase,
                 server: null,
                 sessionId: null);
 
-            result = Example($"Reusing sessionId, specifying server {result.path}",
+            result = Example($"2) Reusing sessionId, specifying server {result.path}",
                 username: fleetInfo.Username,
                 password: null,
                 database: fleetInfo.GeotabDatabase,
@@ -54,14 +54,13 @@ namespace geotab_authentication
                 server: result.path,
                 authenticate: false);
 
-            result = Example("Attempting to reuse sessionId without specifying server",
+            result = Example("3) Attempting to reuse sessionId without specifying server (throws exception)",
                 username: fleetInfo.Username,
                 password: null,
                 database: fleetInfo.GeotabDatabase,
                 sessionId: result.sessionId,
                 server: null,
-                authenticate: false
-                );
+                authenticate: false);
         }
 
         private static ExampleResult Example(string description, string username, string password, string database, string sessionId, string server, bool authenticate = true)
@@ -89,7 +88,7 @@ namespace geotab_authentication
                 Console.WriteLine($"\n\tGeotab Exception: {e.Message}");
             }
 
-            return new ExampleResult{sessionId = api.SessionId, path = api.LoginResult.Path};
+            return new ExampleResult { sessionId = api.SessionId, path = api.LoginResult.Path };
         }
 
         public struct GeotabFleetInformation
